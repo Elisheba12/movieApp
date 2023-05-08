@@ -1,4 +1,6 @@
+import joi from 'joi';
 import { movieModel } from '../model/movieStructure.js';
+import { dataValidator } from '../validator/validator.js';
 
 export const getAllMovies = async (req, res) => {
   try {
@@ -39,6 +41,9 @@ export const getMovie = async (req, res) => {
 
 export const createMovie = async (req, res) => {
   try {
+    const { error, value } = dataValidator(req.body);
+    if (error) return res.send(error.details[0].message);
+
     const { title, genre } = req.body;
     const newMovie = await movieModel.create({ title, genre });
 
