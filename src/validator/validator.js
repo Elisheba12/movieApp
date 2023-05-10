@@ -22,3 +22,10 @@ export const userDataValidator = (data) => {
   }).strict();
   return schema.validate(data);
 }
+export const loginValidator = (data) => {
+  const schema = joi.object({
+    username: joi.string().min(6).required(),
+    password: joi.string().min(6).required(),
+  }).strict();
+  return schema.validate(data);
+}
