@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/movies", getAllMovies);
 router.get("/movie", getMovie)
 router.post("/create-movie", createMovie);
-router.patch("/update", updateOneMovie)
-router.delete("/delete", deleteMovie)
+router.patch("/update-movie", updateOneMovie)
+router.delete("/delete-movie", deleteMovie)
 
 export { router as movieRouter };
