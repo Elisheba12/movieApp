@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'
 import { userModel } from '../model/userStructure.js';
 import { loginValidator, userDataValidator } from '../validator/validator.js';
+import { generateToken } from '../utils/jwt.js';
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -45,6 +46,7 @@ export const createUserReg = async (req, res) => {
   try {
     // Validate user data
     const { error, value } = userDataValidator(req.body); // from joi
+
     if (error) return res.status(400).send(error.details[0].message);
 
     // check if email exists in database prior
@@ -92,15 +94,12 @@ export const createUserLogin = async (req, res) => {
     // check if password matches database and add web token
     const validPass = await bcrypt.compare(req.body.password, userExists.password);
 
-    // Adding web token
-    const token = jwt.sign({ _id: userExists._id }, process.env.TOKEN_SECRET);
-
     if (!validPass) {
       return res.status(400).send('Invalid password');
     } else {
-      res.status(200).header('auth_token', token).send({
+      res.status(200).header('auth_token', generateToken(userExists)).json({
         message: "User logged in",
-        token
+        access_token: generateToken(userExists)
       });
     }
 
