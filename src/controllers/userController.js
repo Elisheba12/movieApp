@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { userModel } from '../model/userStructure.js';
-import { userDataValidator } from '../validator/validator.js';
+import { loginValidator, userDataValidator } from '../validator/validator.js';
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -40,11 +40,11 @@ export const getUser = async (req, res) => {
   }
 };
 
-export const createUser = async (req, res) => {
+export const createUserReg = async (req, res) => {
   try {
     // Validate user data
     const { error, value } = userDataValidator(req.body); // from joi
-    if (error) return res.send(error.details[0].message);
+    if (error) return res.status(400).send(error.details[0].message);
 
     // check if email exists in database prior
     const existingUser = await userModel.findOne({ email: req.body.email });
@@ -78,6 +78,32 @@ export const createUser = async (req, res) => {
   }
 };
 
+export const createUserLogin = async (req, res) => {
+  try {
+    // Validate User login data
+    const { error, value } = loginValidator(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    // check if username exists
+    console.log(typeof (req.body))
+    const userExists = await userModel.findOne({ username: req.body.username });
+    if (!userExists) return res.status(400).send('username not found');
+
+    // check if password matches database
+    const validPass = await bcrypt.compare(req.body.password, userExists.password);
+    if (!validPass) {
+      return res.status(400).send('Invalid password');
+    } else {
+      res.status(200).send('User loggedIn');
+    }
+
+  } catch (error) {
+    res.status(400).json({
+      status: 'failed',
+      message: error.message,
+    });
+  }
+}
 export const userUpdate = async (req, res) => {
   try {
     const user = await userModel.findOneAndUpdate(req.query, req.body, {
