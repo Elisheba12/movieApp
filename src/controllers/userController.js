@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken'
 import { userModel } from '../model/userStructure.js';
 import { loginValidator, userDataValidator } from '../validator/validator.js';
 
@@ -85,17 +86,25 @@ export const createUserLogin = async (req, res) => {
     if (error) return res.status(400).send(error.details[0].message);
 
     // check if username exists
-    console.log(typeof (req.body))
     const userExists = await userModel.findOne({ username: req.body.username });
     if (!userExists) return res.status(400).send('username not found');
 
-    // check if password matches database
+    // check if password matches database and add web token
     const validPass = await bcrypt.compare(req.body.password, userExists.password);
+
+    // Adding web token
+    const token = jwt.sign({ _id: userExists._id }, process.env.TOKEN_SECRET);
+
     if (!validPass) {
       return res.status(400).send('Invalid password');
     } else {
-      res.status(200).send('User loggedIn');
+      res.status(200).header('auth_token', token).send({
+        message: "User logged in",
+        token
+      });
     }
+
+
 
   } catch (error) {
     res.status(400).json({
