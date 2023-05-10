@@ -1,6 +1,5 @@
-import joi from 'joi';
 import { movieModel } from '../model/movieStructure.js';
-import { dataValidator } from '../validator/validator.js';
+import { movieDataValidator } from '../validator/validator.js';
 
 export const getAllMovies = async (req, res) => {
   try {
@@ -41,7 +40,7 @@ export const getMovie = async (req, res) => {
 
 export const createMovie = async (req, res) => {
   try {
-    const { error, value } = dataValidator(req.body);
+    const { error, value } = movieDataValidator(req.body); // from joi
     if (error) return res.send(error.details[0].message);
 
     const { title, genre } = req.body;
@@ -63,8 +62,8 @@ export const createMovie = async (req, res) => {
 
 export const updateOneMovie = async (req, res) => {
   try {
-    console.log(req.query);
-    console.log(req.body);
+    // console.log(req.query);
+    // console.log(req.body);
     const updateOneMovie = await movieModel.findOneAndUpdate(req.query, req.body, {
       new: true,
       runValidators: true
