@@ -1,3 +1,4 @@
+// import { date } from 'joi';
 import mongoose from 'mongoose';
 
 const movieSchema = new mongoose.Schema({
@@ -10,6 +11,9 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: true,
   }
-});
+},
+  {
+    timestamps: true
+  });
 
 export const movieModel = mongoose.model("Movie", movieSchema);
