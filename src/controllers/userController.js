@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcrypt';
 import { userModel } from '../model/userStructure.js';
 import { userDataValidator } from '../validator/validator.js';
 
@@ -41,11 +42,28 @@ export const getUser = async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
+    // Validate user data
     const { error, value } = userDataValidator(req.body); // from joi
     if (error) return res.send(error.details[0].message);
 
-    const newUser = await userModel.create(req.body);
+    // check if email exists in database prior
+    const existingUser = await userModel.findOne({ email: req.body.email });
+    if (existingUser) return res.status(400).send('Email already exists');
 
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+    // create user
+    const newUser = await userModel.create({
+      name: req.body.name,
+      username: req.body.username,
+      password: hashedPassword,
+      gender: req.body.gender,
+      email: req.body.email
+    });
+
+    // response
     res.status(201).json({
       status: "successful",
       message: "User created",
